@@ -1,5 +1,5 @@
 from django.http import HttpResponse
 
 
-def index(request):
+def homepage(request):
     return HttpResponse("Hello, world. You're at the weather index.")
