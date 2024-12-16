@@ -1,34 +1,32 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import Forecast
-from .serializers import ForecastSerializer
-import requests
+from django.shortcuts import render
+import requests,json
+from . models import City
+from . forms import CityForm
 
-class GetForecastView(APIView):
-    def get(self, request, city):
-        # Consumindo a API externa
-        api_key = "95803606d56249d2abf0f746a907c4d8"
-        url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
-        response = requests.get(url)
-
-        if response.status_code == 200:
-            data = response.json()
-            forecast = {
-                "city": city,
-                "temperature": data["main"]["temp"],
-                "description": data["weather"][0]["description"],
-            }
-            # Salvando no banco de dados
-            serializer = ForecastSerializer(data=forecast)
-            if serializer.is_valid():
-                serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-        return Response({"error": "City not found"}, status=status.HTTP_404_NOT_FOUND)
-
-class ForecastHistoryView(APIView):
-    def get(self, request):
-        forecasts = Forecast.objects.all()
-        serializer = ForecastSerializer(forecasts, many=True)
-        return Response(serializer.data)
+# Create your views here.
+def index(request):
+    cities = City.objects.all()
+    url = 'https://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=0c8ca0134cd7534aaf34fdca3a003878'
+    
+    
+    if request.method == 'POST':
+        form = CityForm(request.POST)
+        form.save()
+        
+    
+    
+    form = CityForm()
+    weather_data = []
+    for city in cities:
+        city_weather = requests.get(url.format(city)).json()
+    
+        weather = {
+            'city':city,
+            'temperature':city_weather['main']['temp'],
+            'description':city_weather['weather'][0]['description'],
+            'icon':city_weather['weather'][0]['icon']
+        }
+        
+        weather_data.append(weather)
+    context = {'weather_data': weather_data, 'form' : form}
+    return render(request, 'umbrella/index.html',context) #returns index.html template
