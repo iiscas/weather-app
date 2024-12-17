@@ -5,31 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>What is the current weather?</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Styling */
+        .hero {
+            background: linear-gradient(to right, #6dd5ed, #2193b0);
+            color: white;
+        }
+        .city-box {
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+        .city-box:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            transform: translateY(-5px);
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background: #f9f9f9;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background: linear-gradient(to right, #6dd5ed, #2193b0);
+            color: white;
+        }
+        .weather-icon {
+            width: 40px;
+            height: 40px;
+        }
+        h4 {
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+        .details-toggle {
+            cursor: pointer;
+            color: #3273dc;
+        }
+    </style>
 </head>
+
 <body>
-    <section class="hero is-primary">
+    <!-- Hero Section -->
+    <section class="hero">
         <div class="hero-body">
-            <div class="container">
-                <h1 class="title">
-                    What's the weather like?
-                </h1>
+            <div class="container has-text-centered">
+                <h1 class="title">What's the Weather Like?</h1>
+                <h2 class="subtitle">Add a city and explore the weather forecast</h2>
             </div>
         </div>
     </section>
+
+    <!-- Search Section -->
     <section class="section">
         <div class="container">
-            <div class="columns">
-                <div class="column is-offset-4 is-4">
-                    <form method="POST">
+            <div class="columns is-centered">
+                <div class="column is-half">
+                    <form method="POST" class="box">
                         {% csrf_token %}
                         <div class="field has-addons">
                             <div class="control is-expanded">
                                 {{ form.name }}
                             </div>
                             <div class="control">
-                                <button class="button is-info">
-                                    Add New City
-                                </button>
+                                <button class="button is-info">Add New City</button>
                             </div>
                         </div>
                     </form>
@@ -37,36 +81,157 @@
             </div>
         </div>
     </section>
+
+    <!-- City Weather Section -->
     <section class="section">
         <div class="container">
-            <div class="columns">
-                <div class="column is-offset-4 is-4">
-                    {% for weather in weather_data %}
-                    <div class="box">
-                        <article class="media">
+            <div class="columns is-multiline">
+                {% for weather in weather_data %}
+                <div class="column is-one-third">
+                    <div class="box city-box" id="city-{{ weather.city }}">
+                        <div class="media">
                             <div class="media-left">
-                                <figure class="image is-50x50">
-                                    <img src="http://openweathermap.org/img/w/{{ weather.icon }}.png" alt="Image">
+                                <figure class="image is-64x64">
+                                    <img src="http://openweathermap.org/img/w/{{ weather.icon }}.png" alt="Weather Icon" class="weather-icon">
                                 </figure>
                             </div>
                             <div class="media-content">
-                                <div class="content">
-                                    <p>
-                                        <span class="title">{{ weather.city }}</span>
-                                        <br>
-                                        <span class="subtitle">{{ weather.temperature }}° F</span>
-                                        <br> {{ weather.description }}
-                                    </p>
-                                </div>
+                                <p>
+                                    <span class="title">{{ weather.city }}</span>
+                                    <br>
+                                    <span class="subtitle">{{ weather.temperature }}° C</span>
+                                    <br>{{ weather.description }}
+                                    <br>
+                                    <span class="details-toggle" onclick="toggleDetails('{{ weather.city }}')">View Details</span>
+                                </p>
                             </div>
-                        </article>
+                            <div class="media-right">
+                                <button class="delete" onclick="removeCity('{{ weather.city }}')"></button>
+                            </div>
+                        </div>
+
+                        <!-- Details Section -->
+                        <div id="details-{{ weather.city }}" class="city-details" style="display: none;">
+                            <h4>Today's Hourly Forecast</h4>
+                            <table>
+                                <tr>
+                                    {% for hour in weather.hourly_forecast_today %}
+                                    <th>{{ hour.hour }}</th>
+                                    {% endfor %}
+                                </tr>
+                                <tr>
+                                    {% for hour in weather.hourly_forecast_today %}
+                                    <td>
+                                        <img src="http://openweathermap.org/img/w/{{ hour.icon }}.png" alt="icon" class="weather-icon">
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                                <tr>
+                                    {% for hour in weather.hourly_forecast_today %}
+                                    <td>{{ hour.temperature }}°C</td>
+                                    {% endfor %}
+                                </tr>
+                            </table>
+
+                            <h4>5-Day Forecast</h4>
+                            <table>
+                                {% for day in weather.daily_forecast %}
+                                <tr>
+                                    <td>{{ day.day }}</td>
+                                    <td>Min: {{ day.min_temp }}°C</td>
+                                    <td>Max: {{ day.max_temp }}°C</td>
+                                    <td>
+                                        <img src="http://openweathermap.org/img/w/{{ day.icon }}.png" alt="icon" class="weather-icon">
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
                     </div>
-                    {% endfor %}
                 </div>
+                {% endfor %}
             </div>
         </div>
     </section>
-    <footer class="footer">
-    </footer>
+
+    <script>
+         function toggleDetails(city) {
+            const detailsContainer = document.getElementById(`details-${city}`);
+            
+            // Alterna visibilidade
+            if (detailsContainer.style.display === "none") {
+                fetchForecast(city);
+                detailsContainer.style.display = "block";
+            } else {
+                detailsContainer.style.display = "none";
+            }
+        }
+
+        function fetchForecast(city) {
+            const forecastUrl = `/api/forecast/${city}`;
+ 
+            fetch(forecastUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+ 
+                    // Gerar tabela de previsão horária de hoje
+                    const detailsContainer = document.getElementById(`details-${city}`);
+                    const hourlyForecastToday = `
+                        <h4>Today's Weather (Next 5 Hours)</h4>
+                        <table style="width:100%; text-align:center; border-collapse:collapse;">
+                            <tr>
+                                ${data.hourly_forecast_today.map(hour => `
+                                    <th style="padding:5px; border:1px solid #ccc;">${hour.hour}</th>
+                                `).join("")}
+                            </tr>
+                            <tr>
+                                ${data.hourly_forecast_today.map(hour => `
+                                    <td style="padding:5px; border:1px solid #ccc;">
+                                        <img src="http://openweathermap.org/img/w/${hour.icon}.png" alt="${hour.description}" title="${hour.description}" style="width:50px; height:50px;">
+                                    </td>
+                                `).join("")}
+                            </tr>
+                            <tr>
+                                ${data.hourly_forecast_today.map(hour => `
+                                    <td style="padding:5px; border:1px solid #ccc;">${hour.temperature}°C</td>
+                                `).join("")}
+                            </tr>
+                        </table>
+                    `;
+
+                    // Mostrar previsão diária
+                    const dailyForecast = `
+                        <h4>5-Day Forecast</h4>
+                        <ul>
+                            ${data.daily_forecast.map(day => `
+                                <li>
+                                    ${day.day}: Min ${day.min_temp}°C / Max ${day.max_temp}°C
+                                    <img src="http://openweathermap.org/img/w/${day.icon}.png" alt="Weather Icon">
+                                </li>
+                            `).join('')}
+                        </ul>
+                    `;
+ 
+                    detailsContainer.innerHTML = hourlyForecastToday + dailyForecast;
+                })
+                .catch(error => {
+                    console.error("Error fetching forecast data:", error);
+                    alert("Error fetching forecast data. Try again later.");
+                });
+        }
+
+        function getCSRFToken() {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [key, value] = cookie.trim().split('=');
+                if (key === 'csrftoken') return value;
+            }
+            return null;
+        }
+    </script>
 </body>
 </html>
