@@ -7,7 +7,6 @@ from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 
-
 # URL para pegar os dados do OpenWeatherMap
 API_KEY = '0c8ca0134cd7534aaf34fdca3a003878'
 BASE_URL = 'https://api.openweathermap.org/data/2.5/weather?q={}&units=metric&appid=' + API_KEY
@@ -55,6 +54,7 @@ def dt_to_day(timestamp):
     dt = datetime.fromtimestamp(timestamp)
     return dt.strftime("%A, %d %b")
 
+# Função para obter previsão do tempo
 def city_forecast(request, city):
     # URL para obter dados de previsão de 5 dias / 3 horas
     url = f'http://api.openweathermap.org/data/2.5/forecast?q={city}&units=metric&appid={API_KEY}'
@@ -65,18 +65,26 @@ def city_forecast(request, city):
 
     forecast_data = response.json()
 
-    # Extraindo previsão horária para o mesmo dia
-    current_date = datetime.now().date()
-    hourly_forecast_today = [
-        {
-            "hour": dt_to_hour(datetime.strptime(item["dt_txt"], "%Y-%m-%d %H:%M:%S").timestamp()),
-            "temperature": item["main"]["temp"],
-            "description": item["weather"][0]["description"],
-            "icon": item["weather"][0]["icon"]  # Adiciona o ícone do tempo
-        }
-        for item in forecast_data["list"]
-        if datetime.strptime(item["dt_txt"], "%Y-%m-%d %H:%M:%S").date() == current_date
-    ]
+    # Hora atual
+    current_time = datetime.now()
+
+    # Filtrando as previsões para hoje e as 5 previsões seguintes
+    hourly_forecast_today = []
+    for item in forecast_data["list"]:
+        forecast_time = datetime.strptime(item["dt_txt"], "%Y-%m-%d %H:%M:%S")
+
+        # Se a previsão é para hoje ou para as 5 previsões seguintes
+        if forecast_time >= current_time:
+            hourly_forecast_today.append({
+                "hour": dt_to_hour(forecast_time.timestamp()),
+                "temperature": item["main"]["temp"],
+                "description": item["weather"][0]["description"],
+                "icon": item["weather"][0]["icon"]
+            })
+
+        # Limitar para as 5 previsões seguintes
+        if len(hourly_forecast_today) == 5:
+            break
 
     # Extraindo previsão diária (mínima e máxima para cada dia)
     daily_forecast = {}
@@ -108,7 +116,6 @@ def city_forecast(request, city):
         "daily_forecast": daily_forecast_summary  # Previsão diária
     })
 
-
 @csrf_exempt
 def remove_city(request, city_name):
     if request.method == "DELETE":
@@ -119,4 +126,3 @@ def remove_city(request, city_name):
         except City.DoesNotExist:
             return JsonResponse({"error": "City not found."}, status=404)
     return JsonResponse({"error": "Invalid request method."}, status=405)
-
