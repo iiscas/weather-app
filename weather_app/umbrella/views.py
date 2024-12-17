@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-
+from django.shortcuts import render
 
 def homepage(request):
-    return HttpResponse("Hello, world. You're at the weather index.")
+    return render(request, 'homepage.html')
