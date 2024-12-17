@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>What is the current weather?</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <section class="hero is-primary">
@@ -16,6 +17,7 @@
             </div>
         </div>
     </section>
+
     <section class="section">
         <div class="container">
             <div class="columns">
@@ -37,12 +39,13 @@
             </div>
         </div>
     </section>
+
     <section class="section">
         <div class="container">
             <div class="columns">
                 <div class="column is-offset-4 is-4">
                     {% for weather in weather_data %}
-                    <div class="box">
+                    <div class="box city-box" id="city-{{ weather.city }}">
                         <article class="media">
                             <div class="media-left">
                                 <figure class="image is-50x50">
@@ -52,12 +55,22 @@
                             <div class="media-content">
                                 <div class="content">
                                     <p>
-                                        <span class="title">{{ weather.city }}</span>
+                                        <span class="title" style="cursor: pointer;" onclick="toggleDetails('{{ weather.city }}')">{{ weather.city }}</span>
                                         <br>
                                         <span class="subtitle">{{ weather.temperature }}° F</span>
                                         <br> {{ weather.description }}
                                     </p>
+                                    <!-- Detalhes que serão carregados dinamicamente -->
+                                    <div class="city-details" id="details-{{ weather.city }}" style="display: none;">
+                                        <h4>5-Day Forecast</h4>
+                                        <ul id="daily-forecast-{{ weather.city }}"></ul>
+                                        <canvas id="temperatureChart-{{ weather.city }}" width="400" height="200"></canvas>
+                                    </div>
                                 </div>
+                            </div>
+                            <div class="media-right">
+                                <!-- Botão de lixo -->
+                                <button class="delete is-medium" onclick="removeCity('{{ weather.city }}')" title="Remove city"></button>
                             </div>
                         </article>
                     </div>
@@ -66,7 +79,121 @@
             </div>
         </div>
     </section>
+
     <footer class="footer">
     </footer>
+
+    <script>
+        function toggleDetails(city) {
+            const detailsContainer = document.getElementById(`details-${city}`);
+            
+            // Alterna visibilidade
+            if (detailsContainer.style.display === "none") {
+                fetchForecast(city);
+                detailsContainer.style.display = "block";
+            } else {
+                detailsContainer.style.display = "none";
+            }
+        }
+
+        function fetchForecast(city) {
+            const forecastUrl = `/api/forecast/${city}`; // URL para buscar dados da API.
+
+            fetch(forecastUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+
+                    // Atualizando previsões diárias
+                    const dailyForecastList = document.getElementById(`daily-forecast-${city}`);
+                    dailyForecastList.innerHTML = data.daily_forecast.map(day => `
+                        <li>${day.day}: ${day.temperature}°F, ${day.description}</li>
+                    `).join("");
+
+                    // Atualizando gráfico de temperatura
+                    const ctx = document.getElementById(`temperatureChart-${city}`).getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.hourly_forecast.map(hour => hour.hour), // Horários
+                            datasets: [{
+                                label: 'Hourly Temperature (°F)',
+                                data: data.hourly_forecast.map(hour => hour.temperature), // Temperaturas
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: true
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Hour'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Temperature (°F)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching forecast data:", error);
+                    alert("Error fetching forecast data. Try again later.");
+                });
+        }
+
+        function getCSRFToken() {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [key, value] = cookie.trim().split('=');
+            if (key === 'csrftoken') {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    function removeCity(city) {
+        if (!confirm(`Are you sure you want to remove ${city}?`)) return;
+
+        const csrfToken = getCSRFToken();
+
+        fetch(`/api/remove-city/${city}/`, {
+            method: "DELETE",
+            headers: {
+                "X-CSRFToken": csrfToken,  // Adiciona o token CSRF no cabeçalho
+                "Content-Type": "application/json",
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+                // Remove o elemento da cidade do DOM
+                const cityBox = document.getElementById(`city-${city}`);
+                cityBox.remove();
+            } else {
+                alert("Failed to remove city. Please try again.");
+            }
+        })
+        .catch(error => {
+            console.error("Error removing city:", error);
+            alert("Error removing city. Try again later.");
+        });
+    }
+    </script>
 </body>
 </html>
