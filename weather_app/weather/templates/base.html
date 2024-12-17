@@ -1,72 +1,79 @@
+{% load static %}
+{% load django_bootstrap5 %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What is the current weather?</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.css"/>
+    <title>{% block title %}My Site{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    {% bootstrap_css %}
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Space+Grotesk:wght@300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+          rel="stylesheet">
 </head>
 <body>
-<section class="hero is-primary">
-    <div class="hero-body">
-        <div class="container">
-            <h1 class="title">
-                What's the weather like?
-            </h1>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid">
+        <!-- Logo on the left -->
+        <a class="navbar-brand mx-5"  href="{% url 'home' %}">
+            <img src="{% static 'images/logo.png' %}" alt="Logo" width="230" height="80"
+                 class="d-inline-block align-text-top">
+        </a>
+
+        <!-- Navbar toggler for mobile devices -->
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar links in the center and button on the right -->
+        <div class="collapse navbar-collapse " id="navbarNav">
+            <ul class="navbar-nav mx-auto custom-nav-circle px-5">
+                <!-- Navigation Links in the middle with larger text and circular outline -->
+                <li class="nav-item  mx-2">
+                    <a class="custom-nav-link nav-link px-3" href="{% url 'forecast' %}">Forecast</a>
+                </li>
+                <li class="nav-item  mx-2">
+                    <a class="custom-nav-link nav-link px-3" href="#">Radar</a>
+                </li>
+                <li class="nav-item  mx-2">
+                    <a class="custom-nav-link nav-link px-3" href="#">Alerts</a>
+                </li>
+            </ul>
+
+            <!-- Button on the right with larger text -->
+            <ul class="navbar-nav ml-auto mx-5">
+                <li class="nav-item">
+                    <a class="btn btn-primary btn-lg" href="#" role="button">Get Started</a>
+                </li>
+            </ul>
         </div>
     </div>
-</section>
-<section class="section">
-    <div class="container">
-        <div class="columns">
-            <div class="column is-offset-4 is-4">
-                <form method="POST">
-                    {% csrf_token %}
-                    <div class="field has-addons">
-                        <div class="control is-expanded">
-                            {{ form.name }}
-                        </div>
-                        <div class="control">
-                            <button class="button is-info">
-                                Add New City
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</section>
-<section class="section">
-    <div class="container">
-        <div class="columns">
-            <div class="column is-offset-4 is-4">
-                {% for weather in weather_data %}
-                <div class="box">
-                    <article class="media">
-                        <div class="media-left">
-                            <figure class="image is-50x50">
-                                <img src="https://openweathermap.org/img/w/{{ weather.icon }}.png" alt="Image">
-                            </figure>
-                        </div>
-                        <div class="media-content">
-                            <div class="content">
-                                <p>
-                                    <span class="title">{{ weather.city }}</span>
-                                    <br>
-                                    <span class="subtitle">{{ weather.temperature }}° F</span>
-                                    <br> {{ weather.description }}
-                                </p>
-                            </div>
-                        </div>
-                    </article>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-</section>
-<footer class="footer">
+</nav>
+
+
+<!-- Main Content -->
+
+{% block content %}
+<!-- Page-specific content goes here -->
+{% endblock content %}
+
+<!-- Footer -->
+<footer class="text-center py-3">
+    <p>&copy; 2024 Umbrella. All rights reserved.</p>
 </footer>
+
+<!-- Bootstrap JS -->
+{% bootstrap_javascript %}
 </body>
 </html>

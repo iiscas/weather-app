@@ -1,4 +1,66 @@
 {% extends 'base.html' %}
-{% load static %}
+
+
+{% block title %}Home Page{% endblock title %}
+
 {% block content %}
-{% endblock %}
+{% load static %}
+
+
+{% load static %}
+
+<div class="container-fluid p-5 rounded-3" style="position: relative;">
+    <!-- Background image div -->
+    <div class="image" style="background-image: url('{% static 'images/bg-homepage.jpg' %}');">
+    </div>
+
+
+    <!-- Forward orange container (inner container on top of the image) -->
+    <!-- Forward orange container (inner container on the right side) -->
+    <div class="container inner-container p-5">
+        <div class="row text-end">
+            <!-- Align the text to the right using col-lg-6 -->
+            <div class="col-12">
+                <!-- Inner content goes here, like text, images, etc. -->
+                <h1 class="text-white" style="
+    font-size: 60px;
+">When the sun shines, we'll shine together.</h1>
+                <p class="text-white">Unleash the power of the skies with our mind-blowing weather app!</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="rounded-3 bg-orange" style="position: relative;height: 140px">
+    <h1 class="p-4" style="
+    font-size: 74px;
+">Your personal meteorologist in your pocket
+    </h1>
+</div>
+
+
+<div class="container p-5 rounded-3">
+    <div class="row">
+        <div class="card col mx-3">
+            <img class="card-img-top" src="..." alt="Card image cap">
+            <div class="card-body">
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
+                    card's
+                    content.</p>
+            </div>
+        </div>
+        <div class="card col mx-3">
+            <img class="card-img-top" src="..." alt="Card image cap">
+            <div class="card-body">
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
+                    card's
+                    content.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+{% endblock content %}

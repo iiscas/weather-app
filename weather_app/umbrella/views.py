@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 from django.shortcuts import render
 import requests,json
 from . models import City
@@ -30,3 +33,12 @@ def index(request):
         weather_data.append(weather)
     context = {'weather_data': weather_data, 'form' : form}
     return render(request, 'umbrella/index.html',context) #returns index.html template
+
+
+
+def home(request):
+    return render(request, 'homepage.html')  # returns index.html template
+
+
+def forecast(request):
+    return render(request, 'forecast.html')  # returns index.html template

@@ -1,22 +1,15 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: "Inter Tight", sans-serif;
     text-align: center;
-    background-color: #f0f8ff;
+    background-color: #fdf5e9 !important;
     margin: 0;
     padding: 0;
 }
 
-.container {
-    max-width: 600px;
-    margin: 50px auto;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
 
 h1 {
     color: #333;
+    font-family: "Space Grotesk", sans-serif;
 }
 
 form {
@@ -48,3 +41,93 @@ button:hover {
     margin-top: 20px;
     text-align: left;
 }
+
+
+
+
+.btn-primary {
+    background-color: #60b7c2;  /* Light cyan color */
+    border-color: #60b7c2;
+    border-radius: 50px; /* Make the border circular */
+    padding: 10px 20px;
+}
+
+.btn-primary:hover {
+    background-color: #009fa8;  /* Darker cyan on hover */
+    border-color: #009fa8;
+}
+
+
+
+/* Make the nav links bigger and add circular outline */
+.custom-nav-circle {
+    font-size: 1.3rem; /* Larger font size */
+    padding: 10px 20px; /* Adjust padding for more spacing */
+    border: 2px solid #60b7c2; /* Blue border */
+    border-radius: 50px; /* Make the border circular */
+    transition: all 0.3s ease; /* Smooth transition on hover */
+}
+
+/* Make the nav links bigger and add circular outline */
+.custom-nav-link {
+    font-size: 1.3rem; /* Larger font size */
+    padding: 10px 20px; /* Adjust padding for more spacing */
+    border-radius: 50px; /* Make the border circular */
+    transition: all 0.3s ease; /* Smooth transition on hover */
+}
+
+/* Change color when hovering over nav links */
+.custom-nav-link:hover {
+    background: orange;
+    color: #fdf5e9; /* Text color on hover */
+}
+
+/* Make the button text larger */
+.btn-lg {
+    font-size: 1.25rem; /* Bigger text for the button */
+    padding: 20px 35px; /* More padding for the button */
+}
+
+/* Optional: Add a margin between button and nav items */
+.navbar-nav.ml-auto .nav-item {
+    margin-left: 15px; /* Adds space between the button and nav links */
+}
+
+
+
+/* Background image styling */
+.image {
+    background-image: url('{% static 'images/bg-homepage.jpg' %}');
+    background-size: cover;  /* Ensure the image covers the div */
+    background-position: center; /* Center the image */
+    width: 100%;  /* Ensure the div takes up full width */
+    height: 650px; /* Adjust the height to fit your needs */
+    border-radius: 50px; /* Optional: Rounded corners for the image div */
+    position: relative;  /* Set relative positioning for the image */
+    z-index: 1; /* Ensure the image stays below the inner container */
+}
+
+
+.inner-container {
+    background-color: rgba(255, 165, 0, 0.8); /* Orange with transparency (alpha 0.8) */
+    border-radius: 50px; /* Rounded corners for the inner container */
+    position: absolute;  /* Position it absolutely */
+    top: 15%;  /* Align to the top */
+    right: 6%;  /* Adjust the right position if necessary */
+    width: 50%;  /* Increased width (use a percentage or fixed width like px) */
+    height: 72%;  /* Adjust the height */
+    z-index: 2; /* Make sure it is on top of the image */
+    padding: 20px;
+}
+
+
+/* Optional: make sure the text is well styled inside the inner container */
+.inner-container h1, .inner-container p {
+    margin: 0;
+}
+
+
+.bg-orange{
+    background-color: rgba(255, 165, 0, 1); /* Orange with transparency (alpha 0.8) */
+}
+
