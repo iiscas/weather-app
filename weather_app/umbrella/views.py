@@ -10,13 +10,13 @@ from django.contrib import messages
 
 # URL para pegar os dados do OpenWeatherMap
 API_KEY = '0c8ca0134cd7534aaf34fdca3a003878'
-BASE_URL = 'https://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=' + API_KEY
+BASE_URL = 'https://api.openweathermap.org/data/2.5/weather?q={}&units=metric&appid=' + API_KEY
 WEATHER_API = 'https://api.openweathermap.org/data/2.5/onecall?lat={}&lon={}&exclude=current,minutely&appid=' + API_KEY + '&units=metric'
 
 # Função para a página inicial (exibe as cidades e suas temperaturas)
 def index(request):
     cities = City.objects.all()
-    url = 'https://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=0c8ca0134cd7534aaf34fdca3a003878'
+    url = 'https://api.openweathermap.org/data/2.5/weather?q={}&units=metric&appid=0c8ca0134cd7534aaf34fdca3a003878'
 
     if request.method == 'POST':
         form = CityForm(request.POST)
@@ -58,7 +58,7 @@ def dt_to_day(timestamp):
 # Função para obter previsão do tempo
 def city_forecast(request, city):
     # URL para obter dados de previsão de 5 dias / 3 horas
-    url = f'http://api.openweathermap.org/data/2.5/forecast?q={city}&units=imperial&appid={API_KEY}'
+    url = f'http://api.openweathermap.org/data/2.5/forecast?q={city}&units=metric&appid={API_KEY}'
     response = requests.get(url)
 
     if response.status_code != 200:

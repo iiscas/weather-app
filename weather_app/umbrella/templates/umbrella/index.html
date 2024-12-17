@@ -57,7 +57,7 @@
                                     <p>
                                         <span class="title" style="cursor: pointer;" onclick="toggleDetails('{{ weather.city }}')">{{ weather.city }}</span>
                                         <br>
-                                        <span class="subtitle">{{ weather.temperature }}° F</span>
+                                        <span class="subtitle">{{ weather.temperature }}° C</span>
                                         <br> {{ weather.description }}
                                     </p>
                                     <!-- Detalhes que serão carregados dinamicamente -->
@@ -110,7 +110,7 @@
                     // Atualizando previsões diárias
                     const dailyForecastList = document.getElementById(`daily-forecast-${city}`);
                     dailyForecastList.innerHTML = data.daily_forecast.map(day => `
-                        <li>${day.day}: ${day.temperature}°F, ${day.description}</li>
+                        <li>${day.day}: ${day.temperature}°C, ${day.description}</li>
                     `).join("");
 
                     // Atualizando gráfico de temperatura
@@ -120,7 +120,7 @@
                         data: {
                             labels: data.hourly_forecast.map(hour => hour.hour), // Horários
                             datasets: [{
-                                label: 'Hourly Temperature (°F)',
+                                label: 'Hourly Temperature (°C)',
                                 data: data.hourly_forecast.map(hour => hour.temperature), // Temperaturas
                                 borderColor: 'rgba(75, 192, 192, 1)',
                                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -144,7 +144,7 @@
                                 y: {
                                     title: {
                                         display: true,
-                                        text: 'Temperature (°F)'
+                                        text: 'Temperature (°C)'
                                     }
                                 }
                             }
