@@ -55,7 +55,6 @@ def dt_to_day(timestamp):
     dt = datetime.fromtimestamp(timestamp)
     return dt.strftime("%A, %d %b")
 
-# Função para obter previsão do tempo
 def city_forecast(request, city):
     # URL para obter dados de previsão de 5 dias / 3 horas
     url = f'http://api.openweathermap.org/data/2.5/forecast?q={city}&units=metric&appid={API_KEY}'
@@ -68,43 +67,47 @@ def city_forecast(request, city):
 
     # Extraindo previsão horária para o mesmo dia
     current_date = datetime.now().date()
-    hourly_forecast = [
+    hourly_forecast_today = [
         {
             "hour": dt_to_hour(datetime.strptime(item["dt_txt"], "%Y-%m-%d %H:%M:%S").timestamp()),
             "temperature": item["main"]["temp"],
-            "description": item["weather"][0]["description"]
+            "description": item["weather"][0]["description"],
+            "icon": item["weather"][0]["icon"]  # Adiciona o ícone do tempo
         }
         for item in forecast_data["list"]
         if datetime.strptime(item["dt_txt"], "%Y-%m-%d %H:%M:%S").date() == current_date
     ]
 
-    # Extraindo previsão diária (média de temperatura para cada dia)
+    # Extraindo previsão diária (mínima e máxima para cada dia)
     daily_forecast = {}
     for item in forecast_data["list"]:
         forecast_date = datetime.strptime(item["dt_txt"], "%Y-%m-%d %H:%M:%S").date()
         if forecast_date not in daily_forecast:
             daily_forecast[forecast_date] = {
                 "day": dt_to_day(datetime.strptime(item["dt_txt"], "%Y-%m-%d %H:%M:%S").timestamp()),
-                "temperatures": [],
-                "descriptions": []
+                "min_temp": item["main"]["temp"],
+                "max_temp": item["main"]["temp"],
+                "icon": item["weather"][0]["icon"]
             }
-        daily_forecast[forecast_date]["temperatures"].append(item["main"]["temp"])
-        daily_forecast[forecast_date]["descriptions"].append(item["weather"][0]["description"])
+        else:
+            daily_forecast[forecast_date]["min_temp"] = min(daily_forecast[forecast_date]["min_temp"], item["main"]["temp"])
+            daily_forecast[forecast_date]["max_temp"] = max(daily_forecast[forecast_date]["max_temp"], item["main"]["temp"])
 
-    # Calculando temperatura média e descrição mais comum para cada dia
     daily_forecast_summary = [
         {
             "day": details["day"],
-            "temperature": round(sum(details["temperatures"]) / len(details["temperatures"]), 2),
-            "description": max(set(details["descriptions"]), key=details["descriptions"].count)
+            "min_temp": details["min_temp"],
+            "max_temp": details["max_temp"],
+            "icon": details["icon"]  # Icone do primeiro período para cada dia
         }
         for date, details in daily_forecast.items()
     ]
 
     return JsonResponse({
-        "hourly_forecast": hourly_forecast,
-        "daily_forecast": daily_forecast_summary
+        "hourly_forecast_today": hourly_forecast_today,  # Previsão detalhada do dia de hoje
+        "daily_forecast": daily_forecast_summary  # Previsão diária
     })
+
 
 @csrf_exempt
 def remove_city(request, city_name):

@@ -6,7 +6,9 @@
     <title>What is the current weather?</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
+
 <body>
     <section class="hero is-primary">
         <div class="hero-body">
@@ -97,65 +99,63 @@
         }
 
         function fetchForecast(city) {
-            const forecastUrl = `/api/forecast/${city}`; // URL para buscar dados da API.
+    const forecastUrl = `/api/forecast/${city}`;
+ 
+    fetch(forecastUrl)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+ 
+            // Gerar tabela de previsão horária de hoje
+            const detailsContainer = document.getElementById(`details-${city}`);
+            const hourlyForecastToday = `
+                <h4>Today's Weather</h4>
+                <table style="width:100%; text-align:center; border-collapse:collapse;">
+                <tr>
+                                        ${data.hourly_forecast_today.map(hour => `
+                <th style="padding:5px; border:1px solid #ccc;">${hour.hour}</th>
+                                        `).join("")}
+                </tr>
+                <tr>
+                                        ${data.hourly_forecast_today.map(hour => `
+                <td style="padding:5px; border:1px solid #ccc;">
+                <img src="http://openweathermap.org/img/wn/${hour.icon}.png" alt="${hour.description}" title="${hour.description}" style="width:50px; height:50px;">
+                </td>
+                                        `).join("")}
+                </tr>
+                <tr>
+                                        ${data.hourly_forecast_today.map(hour => `
+                <td style="padding:5px; border:1px solid #ccc;">${hour.temperature}°C</td>
+                                        `).join("")}
+                </tr>
+                </table>
+                            `;
+                
+                            // Mostrar previsão diária
+                            const dailyForecast = `
+                <h4>5-Day Forecast</h4>
+                <ul>
+                                    ${data.daily_forecast.map(day => `
+                <li>
+                                            ${day.day}: Min ${day.min_temp}°C / Max ${day.max_temp}°C
+                <img src="http://openweathermap.org/img/wn/${day.icon}.png" alt="Weather Icon">
+                </li>
+                                    `).join('')}
+                </ul>
+                            `;
+ 
+            detailsContainer.innerHTML = hourlyForecastToday + dailyForecast;
+        })
+        .catch(error => {
+            console.error("Error fetching forecast data:", error);
+            alert("Error fetching forecast data. Try again later.");
+        });
+}
 
-            fetch(forecastUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert(data.error);
-                        return;
-                    }
 
-                    // Atualizando previsões diárias
-                    const dailyForecastList = document.getElementById(`daily-forecast-${city}`);
-                    dailyForecastList.innerHTML = data.daily_forecast.map(day => `
-                        <li>${day.day}: ${day.temperature}°C, ${day.description}</li>
-                    `).join("");
-
-                    // Atualizando gráfico de temperatura
-                    const ctx = document.getElementById(`temperatureChart-${city}`).getContext('2d');
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: data.hourly_forecast.map(hour => hour.hour), // Horários
-                            datasets: [{
-                                label: 'Hourly Temperature (°C)',
-                                data: data.hourly_forecast.map(hour => hour.temperature), // Temperaturas
-                                borderColor: 'rgba(75, 192, 192, 1)',
-                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: {
-                                    display: true
-                                }
-                            },
-                            scales: {
-                                x: {
-                                    title: {
-                                        display: true,
-                                        text: 'Hour'
-                                    }
-                                },
-                                y: {
-                                    title: {
-                                        display: true,
-                                        text: 'Temperature (°C)'
-                                    }
-                                }
-                            }
-                        }
-                    });
-                })
-                .catch(error => {
-                    console.error("Error fetching forecast data:", error);
-                    alert("Error fetching forecast data. Try again later.");
-                });
-        }
 
         function getCSRFToken() {
         const cookies = document.cookie.split(';');
@@ -197,3 +197,4 @@
     </script>
 </body>
 </html>
+
