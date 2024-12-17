@@ -35,7 +35,7 @@ def index(request):
         city_weather = requests.get(url.format(city.name)).json()
         weather = {
             'city': city.name,
-            'temperature': city_weather['main']['temp'],
+            'temperature': int(city_weather['main']['temp']),
             'description': city_weather['weather'][0]['description'],
             'icon': city_weather['weather'][0]['icon']
         }
@@ -77,7 +77,7 @@ def city_forecast(request, city):
         if forecast_time >= current_time:
             hourly_forecast_today.append({
                 "hour": dt_to_hour(forecast_time.timestamp()),
-                "temperature": item["main"]["temp"],
+                "temperature": int(item["main"]["temp"]),  # Arredondar para número inteiro
                 "description": item["weather"][0]["description"],
                 "icon": item["weather"][0]["icon"]
             })
@@ -93,13 +93,13 @@ def city_forecast(request, city):
         if forecast_date not in daily_forecast:
             daily_forecast[forecast_date] = {
                 "day": dt_to_day(datetime.strptime(item["dt_txt"], "%Y-%m-%d %H:%M:%S").timestamp()),
-                "min_temp": item["main"]["temp"],
-                "max_temp": item["main"]["temp"],
+                "min_temp": int(item["main"]["temp"]),  # Arredondar para número inteiro
+                "max_temp": int(item["main"]["temp"]),  # Arredondar para número inteiro
                 "icon": item["weather"][0]["icon"]
             }
         else:
-            daily_forecast[forecast_date]["min_temp"] = min(daily_forecast[forecast_date]["min_temp"], item["main"]["temp"])
-            daily_forecast[forecast_date]["max_temp"] = max(daily_forecast[forecast_date]["max_temp"], item["main"]["temp"])
+            daily_forecast[forecast_date]["min_temp"] = min(daily_forecast[forecast_date]["min_temp"], int(item["main"]["temp"]))
+            daily_forecast[forecast_date]["max_temp"] = max(daily_forecast[forecast_date]["max_temp"], int(item["main"]["temp"]))
 
     daily_forecast_summary = [
         {
